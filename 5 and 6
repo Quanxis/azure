@@ -1,1 +1,69 @@
-application gateway for tier waf /laf
+`application gateway for tier waf /laf
+-create a new subnet 
+`chose wafv2
+`default instances if not specified
+-choose vnet1/first network
+
+
+
+
+
+Create and implement networking design for three tiered application and required NSGs. Database uses port 3306/TCP, frontend and backend both use port 8000/UDP.
+Designing a network for a three-tier application in Microsoft Azure involves creating a secure and scalable environment. 
+This setup typically includes a web frontend, an application backend, and a database tier. Each tier will be isolated in its own subnet within a virtual network, ensuring that services are segregated for security and manageability. Here’s how you can design and implement this:
+
+1. Azure Virtual Network and Subnets
+Virtual Network (VNet): Create a VNet named VNetApp with an address space that can accommodate three subnets. For example, you could use 10.10.0.0/16.
+
+Subnets:
+
+Web Frontend Subnet: 10.10.1.0/24
+Application Backend Subnet: 10.10.2.0/24
+Database Subnet: 10.10.3.0/24
+2. Network Security Groups (NSGs)
+For each subnet, create a Network Security Group (NSG) to enforce security rules that allow traffic to only necessary services:
+
+Web Frontend NSG: WebNSG
+
+Inbound Rules:
+Allow UDP on port 8000 from the Internet (0.0.0.0/0) for client access.
+Outbound Rules:
+Allow UDP on port 8000 to the Application Backend Subnet (10.10.2.0/24).
+Application Backend NSG: AppNSG
+
+Inbound Rules:
+Allow UDP on port 8000 from the Web Frontend Subnet (10.10.1.0/24).
+Outbound Rules:
+Allow TCP on port 3306 to the Database Subnet (10.10.3.0/24).
+Database NSG: DBNSG
+
+Inbound Rules:
+Allow TCP on port 3306 from the Application Backend Subnet (10.10.2.0/24).
+Outbound Rules:
+Restrict all outbound traffic as a best practice unless specific outbound traffic is required.
+3. Azure Resources
+Virtual Machines: Deploy VMs in each subnet according to their roles:
+
+Web Frontend VMs: In the Web Frontend Subnet.
+Application Backend VMs: In the Application Backend Subnet.
+Database Servers: In the Database Subnet.
+Load Balancers: If required, place a load balancer in front of the Web Frontend and another in front of the Application Backend for scalability and high availability.
+
+4. Implementation Steps
+Create the Virtual Network and Subnets:
+
+Navigate to the Azure Portal.
+Create VNetApp and add the subnets as described.
+Create NSGs and Assign Rules:
+
+Create each NSG in the Azure Portal.
+Assign the NSGs to their respective subnets.
+Configure the rules as specified.
+Deploy VMs and Other Resources:
+
+Deploy VMs for each tier within their respective subnets.
+Configure the VMs according to their roles (e.g., install web server software on frontend VMs, application runtime on backend VMs, and database software on DB servers).
+Testing and Validation:
+
+Test connectivity between tiers using tools like ping (if ICMP is allowed) or specific client software that can connect to the respective ports.
+Ensure that the application behaves as expected with the NSGs enforcing the network traffic rules.
