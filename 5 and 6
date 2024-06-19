@@ -1,3 +1,7 @@
+Load balancing-
+tier - regional  
+
+
 `application gateway for tier waf /laf
 -create a new subnet 
 `chose wafv2
