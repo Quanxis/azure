@@ -1,12 +1,23 @@
+  
+Create azure load balancer which will accept traffic from clients all over the world over the Internet and redirect it to a backend pool. Create a front end IP as required. Add name-surname-mgmt to backend pool by using its
+private IP/NIC. LB should listen on port 8000 and forward traffic to backend pool on port 4000.
 Load balancing-
-tier - regional  
+tier - regional
+
+v1 - 10.11.0.0./16 subnet 10.11.0.0/24
+v2 - 10.12.0.0/16 subnet 10.11.1.0/24
+
+Implement a load balancing solution for an application which has their apps deployed across availability zones for both internal and public clients.
+Internal clients should not leave Azure's network. Load balancing should also support advanced L7 load balancing features and WAF rules.
 
 
 `application gateway for tier waf /laf
--create a new subnet 
+-create a new subnet in vnet1
+`create new for front end Public IP address andpput different ip adrss for Private IP addres in front end config - 10.11.1.69 
 `chose wafv2
 `default instances if not specified
 -choose vnet1/first network
+` for rule in listener choose public ipv4
 
 
 
