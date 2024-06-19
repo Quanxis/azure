@@ -1,0 +1,126 @@
+## The three-tier architecture
+
+Of all N-tier architectures, a three-tier architecture is the most common. The responsibilities and names of each layer and tier vary by application and business, but a typical three-tier application has: a presentation tier, an application or middle tier, and a data tier. This architecture is the most common N-tier style. For the rest of this module, we'll reference a three-tier model with each tier running a single layer of the application, and refer to them synonymously as tiers.
+
+### Presentation tier
+
+The presentation tier typically facilitates user requests. These requests could be users accessing a web page, or public access to your application through an exposed API. The focus at this tier is on the user experience. Providing things like an intuitive interface, and ensuring secure communication between the end user and your application.
+
+At this tier you're not concerned with the data itself, other than how it's presented to the user. Typically, there's no data processing or data access that is happening at this tier. This is the responsibility of the lower tiers.
+
+### Application tier
+
+The application tier (also often called the middle tier) typically focuses on handling the business logic of the application. This could be handling a customer order, tracking a shipment, or updating inventory based on materials received. This tier is also responsible for create, read, update, delete (CRUD) activities against the data tier. This is also a good location to make calls to dependent services, such as external APIs.
+
+This tier isn't concerned about how the information is presented back to the user, nor is it concerned with how the data is stored and retrieved. The focus is on the business logic required to fulfill the request that the application has received.
+
+### Data tier
+
+On this tier, the focus is on data storage. Storage of the data in tables, files, or other medium is the responsibility of this tier. This tier provides an interface (such as T-SQL) to access the data. In a three-tier architecture, the data layer provides data access to the application tier.
+
+This tier isn't focused on how the data is presented to the user, nor is it focused on any logic around the data. The usage of stored procedures may sit in this tier, but most of the logic around the data should be handled at a higher tier.
+
+In a three-tier architecture, we typically have:
+
+1. **Front-end (Presentation) Layer**: Handles the user interface.
+2. **Back-end (Application) Layer**: Contains the business logic.
+3. **Database Layer**: Manages the data storage and retrieval.
+
+#### Networking Design
+
+1. **Virtual Network (VNet)**:
+    
+    - Create a single VNet to host all tiers.
+    - Define three subnets within this VNet:
+        - `Subnet-FrontEnd`: For front-end servers.
+        - `Subnet-BackEnd`: For back-end servers.
+        - `Subnet-DB`: For database servers.
+2. **Network Security Groups (NSGs)**:
+    
+    - **NSG-FrontEnd**: Attach to `Subnet-FrontEnd`.
+        - Allow inbound traffic on port 8000 (UDP) from any source.
+        - Allow outbound traffic to `Subnet-BackEnd` on port 8000 (UDP).
+    - **NSG-BackEnd**: Attach to `Subnet-BackEnd`.
+        - Allow inbound traffic on port 8000 (UDP) from `Subnet-FrontEnd`.
+        - Allow outbound traffic to `Subnet-FrontEnd` on port 8000 (UDP).
+        - Allow outbound traffic to `Subnet-DB` on port 3306 (TCP).
+    - **NSG-DB**: Attach to `Subnet-DB`.
+        - Allow inbound traffic on port 3306 (TCP) from `Subnet-BackEnd`.
+        - Deny all other inbound traffic.
+        - Allow outbound traffic as required (e.g., for backup services).
+
+#### Implementation Steps
+
+1. **Create Virtual Network and Subnets**:
+    
+    - Go to the Azure portal.
+    - Navigate to "Virtual Networks" and create a new VNet.
+    - Define three subnets: `Subnet-FrontEnd`, `Subnet-BackEnd`, and `Subnet-DB`.
+2. **Create Network Security Groups**:
+    
+    - Create three NSGs: `NSG-FrontEnd`, `NSG-BackEnd`, and `NSG-DB`.
+    - Configure inbound and outbound rules for each NSG as per the requirements.
+3. **Attach NSGs to Subnets**:
+    
+    - Attach `NSG-FrontEnd` to `Subnet-FrontEnd`.
+    - Attach `NSG-BackEnd` to `Subnet-BackEnd`.
+    - Attach `NSG-DB` to `Subnet-DB`.
+4. **Create VMs**:
+    
+    - Create VMs in the respective subnets (front-end, back-end, and database).
+
+#### Detailed Configuration of NSGs
+
+**NSG-FrontEnd**:
+
+- **Inbound Rules**:
+    - Allow: Source: Any, Source Port: Any, Destination: Any, Destination Port: 8000, Protocol: UDP
+- **Outbound Rules**:
+    - Allow: Source: Any, Source Port: Any, Destination: Subnet-BackEnd, Destination Port: 8000, Protocol: UDP
+
+**NSG-BackEnd**:
+
+- **Inbound Rules**:
+    - Allow: Source: Subnet-FrontEnd, Source Port: Any, Destination: Any, Destination Port: 8000, Protocol: UDP
+- **Outbound Rules**:
+    - Allow: Source: Any, Source Port: Any, Destination: Subnet-FrontEnd, Destination Port: 8000, Protocol: UDP
+    - Allow: Source: Any, Source Port: Any, Destination: Subnet-DB, Destination Port: 3306, Protocol: TCP
+
+**NSG-DB**:
+
+- **Inbound Rules**:
+    - Allow: Source: Subnet-BackEnd, Source Port: Any, Destination: Any, Destination Port: 3306, Protocol: TCP
+    - Deny all other inbound traffic.
+- **Outbound Rules**:
+    - Allow: Source: Any, Source Port: Any, Destination: Any, Destination Port: Any, Protocol: Any (default)
+    
+    ### Documentation
+
+1. **Virtual Network (VNet)**:
+    
+    - Name: `VNet-ThreeTierApp`
+    - Address Space: `10.0.0.0/16`
+2. **Subnets**:
+    
+    - `Subnet-FrontEnd`: `10.0.1.0/24`
+    - `Subnet-BackEnd`: `10.0.2.0/24`
+    - `Subnet-DB`: `10.0.3.0/24`
+3. **Network Security Groups (NSGs)**:
+    
+    - `NSG-FrontEnd`
+        - Allow inbound on port 8000 UDP from any source.
+        - Allow outbound to `Subnet-BackEnd` on port 8000 UDP.
+    - `NSG-BackEnd`
+        - Allow inbound on port 8000 UDP from `Subnet-FrontEnd`.
+        - Allow outbound to `Subnet-FrontEnd` on port 8000 UDP.
+        - Allow outbound to `Subnet-DB` on port 3306 TCP.
+    - `NSG-DB`
+        - Allow inbound on port 3306 TCP from `Subnet-BackEnd`.
+        - Deny all other inbound traffic.
+4. **VMs**:
+    
+    - Place front-end VMs in `Subnet-FrontEnd`.
+    - Place back-end VMs in `Subnet-BackEnd`.
+    - Place database VMs in `Subnet-DB`.
+
+This design ensures that the front-end, back-end, and database tiers are appropriately isolated and secured, while allowing necessary communication between the tiers
