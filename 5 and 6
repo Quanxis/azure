@@ -82,3 +82,7 @@ Testing and Validation:
 
 Test connectivity between tiers using tools like ping (if ICMP is allowed) or specific client software that can connect to the respective ports.
 Ensure that the application behaves as expected with the NSGs enforcing the network traffic rules.
+
+
+https://learn.microsoft.com/en-us/azure/storage/files/storage-how-to-use-files-portal?tabs=azure-portal
+https://learn.microsoft.com/en-us/training/modules/n-tier-architecture/4-n-tier-architecture-considerations
