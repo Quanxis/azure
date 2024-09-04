@@ -1,0 +1,50 @@
+a) Create a virtual network called VNET1 with network range of 10.1.0.0/16.
+b) Create a virtual network called VNET2 with network range of 10.2.0.0/16.
+c) In VNET1 create management subnet called mgmt (10.1.0.0/24).
+d) In VNET2 create app subnet called app. (10.2.0.0/24)
+e) Create one Ubuntu VM named name-surname-mgmt in mgmt subnet (10.1.0.0/24)
+ static IP of 10.11.0.254
+
+ when static given in different netowkr go to adress space in vnet 1 and add
+
+
+
+private 80
+public 8080 port
+inbound 443/80
+outtbound - X
+
+
+source for internal lb - 10.11.0.254 or subnet of LB 10.11.0.0/24
+destination -vnet1, tcp for inbound rule - 10.1.0.0/24
+
+source outbound -10.1.0.0/24
+
+
+should support waf and l7 - application gateway L4
+shoult not support l7 - load balacner
+
+
+
+
+
+
+
+This design consists of three subnets: frontend-subnet, backend-subnet, and database-subnet, each corresponding to a tier of the application.
+
+Frontend Tier: Hosts the user interface in the frontend-subnet. It communicates with the backend over port 8000/UDP.
+Backend Tier: Contains the application logic in the backend-subnet. It interacts with both the frontend and database on port 8000/UDP and port 3306/TCP respectively.
+Database Tier: The database resides in the database-subnet and listens on port 3306/TCP for backend connections.
+NSG Configuration:
+Frontend NSG:
+
+Inbound: Allow HTTP/HTTPS from the Internet and allow traffic from the backend on port 8000/UDP.
+Outbound: Allow traffic to the backend on port 8000/UDP.
+Backend NSG:
+
+Inbound: Allow traffic from the frontend on port 8000/UDP and from the database on port 3306/TCP.
+Outbound: Allow traffic to the database on port 3306/TCP.
+Database NSG:
+
+Inbound: Allow traffic from the backend on port 3306/TCP.
+Outbound: Allow traffic to the backend on port 8000/UDP.
